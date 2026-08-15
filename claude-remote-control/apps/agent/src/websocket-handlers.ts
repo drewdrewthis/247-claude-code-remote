@@ -5,6 +5,7 @@
 
 import { WebSocket } from 'ws';
 import { execSync } from 'child_process';
+import { existsSync } from 'fs';
 import { createTerminal } from './terminal.js';
 import { config } from './config.js';
 import * as sessionsDb from './db/sessions.js';
@@ -107,15 +108,23 @@ export function handleTerminalConnection(ws: WebSocket, url: URL): void {
   const hasWhitelist = whitelist && whitelist.length > 0;
   // Allow empty string for root, but reject null/undefined
   const isRootTerminal = project === '';
-  const isAllowed = isRootTerminal || (hasWhitelist ? whitelist.includes(project!) : true);
-  if (project === null || project === undefined || !isAllowed) {
+  // Attaching an existing tmux session bypasses the whitelist — it only
+  // gates creating new terminals; legacy sessions aren't named project--*.
+  const attachExisting = !!urlSessionName && tmuxSessionExists(urlSessionName);
+  const isAllowed =
+    attachExisting || isRootTerminal || (hasWhitelist ? whitelist.includes(project!) : true);
+  if ((project === null || project === undefined || !isAllowed) && !attachExisting) {
     ws.close(1008, 'Project not allowed');
     return;
   }
 
-  // For root terminal, use basePath directly; otherwise append project name
+  // For root terminal, use basePath directly; otherwise append project name.
+  // When attaching an existing session whose project dir is missing, fall
+  // back to basePath — cwd is irrelevant for a tmux attach.
   const basePath = config.projects.basePath.replace('~', process.env.HOME!);
-  const projectPath = isRootTerminal ? basePath : `${basePath}/${project}`;
+  const candidatePath = isRootTerminal || project === null ? basePath : `${basePath}/${project}`;
+  const projectPath =
+    attachExisting && !existsSync(candidatePath) ? basePath : candidatePath;
 
   console.log(`New terminal connection for project: ${project}`);
   console.log(`Project path: ${projectPath}`);
