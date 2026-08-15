@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db, pushSubscription } from '@/lib/db';
 import { eq } from 'drizzle-orm';
+import { getUser } from '@/lib/auth-server';
 
 /**
  * POST /api/push/subscribe
@@ -8,8 +9,7 @@ import { eq } from 'drizzle-orm';
  */
 export async function POST(req: Request) {
   try {
-    const { neonAuth } = await import('@neondatabase/auth/next/server');
-    const { user } = await neonAuth();
+    const user = await getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -58,8 +58,7 @@ export async function POST(req: Request) {
  */
 export async function DELETE(req: Request) {
   try {
-    const { neonAuth } = await import('@neondatabase/auth/next/server');
-    const { user } = await neonAuth();
+    const user = await getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

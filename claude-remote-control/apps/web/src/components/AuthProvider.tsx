@@ -7,6 +7,10 @@ import { useRouter } from 'next/navigation';
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
+  if (process.env.NEXT_PUBLIC_LOCAL_MODE === 'true') {
+    return <>{children}</>;
+  }
+
   return (
     <NeonAuthUIProvider
       authClient={authClient}

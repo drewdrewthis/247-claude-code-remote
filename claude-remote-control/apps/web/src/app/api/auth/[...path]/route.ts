@@ -1,7 +1,21 @@
 import type { NextRequest } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // Lazy handler to avoid build-time env var requirement
 async function createHandler(method: string) {
+  if (process.env.LOCAL_MODE === 'true') {
+    // Local mode: the Neon Auth API is never proxied. get-session reports
+    // the static local user; everything else is a no-op.
+    return async (request: NextRequest) => {
+      if (request.nextUrl.pathname.endsWith('/get-session')) {
+        return NextResponse.json({
+          user: { id: 'local-user', name: 'Local', email: 'local@localhost' },
+          session: {},
+        });
+      }
+      return NextResponse.json({ ok: true });
+    };
+  }
   const { authApiHandler } = await import('@neondatabase/auth/next/server');
   const handlers = authApiHandler();
   return handlers[method as keyof typeof handlers];

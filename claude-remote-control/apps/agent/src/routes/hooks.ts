@@ -14,7 +14,12 @@ import * as sessionsDb from '../db/sessions.js';
 import { broadcastStatusUpdate } from '../websocket-handlers.js';
 import { loadConfig } from '../config.js';
 
-const WEB_PUSH_URL = 'https://247.quivr.com/api/push/notify';
+// Push endpoint follows the configured dashboard; no hardcoded external host.
+function getWebPushUrl(): string {
+  const config = loadConfig();
+  const apiUrl = config.dashboard?.apiUrl || 'http://localhost:3001/api';
+  return `${apiUrl.replace(/\/$/, '')}/push/notify`;
+}
 
 /**
  * Send push notification to web API
@@ -29,7 +34,7 @@ async function sendPushNotification(sessionName: string): Promise<void> {
       return;
     }
 
-    const response = await fetch(WEB_PUSH_URL, {
+    const response = await fetch(getWebPushUrl(), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ machineId, sessionName }),

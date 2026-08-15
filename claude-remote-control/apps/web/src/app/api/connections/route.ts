@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { db, agentConnection } from '@/lib/db';
 import { eq } from 'drizzle-orm';
+import { getUser } from '@/lib/auth-server';
 
 export async function GET() {
   try {
-    const { neonAuth } = await import('@neondatabase/auth/next/server');
-    const { user } = await neonAuth();
+    const user = await getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -24,8 +24,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { neonAuth } = await import('@neondatabase/auth/next/server');
-    const { user } = await neonAuth();
+    const user = await getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

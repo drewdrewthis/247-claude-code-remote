@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { db, agentConnection } from '@/lib/db';
 import { eq, and } from 'drizzle-orm';
+import { getUser } from '@/lib/auth-server';
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { neonAuth } = await import('@neondatabase/auth/next/server');
-    const { user } = await neonAuth();
+    const user = await getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -25,8 +25,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { neonAuth } = await import('@neondatabase/auth/next/server');
-    const { user } = await neonAuth();
+    const user = await getUser();
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

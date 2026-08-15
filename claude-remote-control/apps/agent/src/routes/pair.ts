@@ -92,7 +92,7 @@ function getDashboardUrl(): string {
     // Extract base URL from API URL (remove /api suffix)
     return config.dashboard.apiUrl.replace(/\/api\/?$/, '');
   }
-  return 'https://247.quivr.com';
+  return 'http://localhost:3001';
 }
 
 // Generate QR code as SVG using a simple implementation
@@ -100,8 +100,9 @@ function generateQRCodeSVG(data: string): string {
   // Use a simple QR code approach - encode the URL in a data URI
   // For production, you'd use a proper QR library like 'qrcode'
   // Here we'll use Google Charts API as a simple fallback
-  const encoded = encodeURIComponent(data);
-  return `<img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encoded}" alt="QR Code" width="200" height="200" style="image-rendering: pixelated;" />`;
+  // External QR services would leak the pairing URL and token; show the
+  // URL as copyable text instead.
+  return `<code style="word-break: break-all; user-select: all;">${data.replace(/&/g, '&amp;').replace(/</g, '&lt;')}</code>`;
 }
 
 export function createPairRoutes(): Router {
