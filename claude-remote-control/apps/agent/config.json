@@ -1,7 +1,7 @@
 {
   "machine": {
-    "id": "mac-mini-home",
-    "name": "Mac Mini (home)"
+    "id": "langwatch-dev-box",
+    "name": "LangWatch Dev Box"
   },
   "agent": {
     "port": 4678,
@@ -13,7 +13,7 @@
     "idleTimeout": 1800000
   },
   "projects": {
-    "basePath": "~/Dev",
+    "basePath": "~/Projects",
     "whitelist": []
   },
   "dashboard": {
